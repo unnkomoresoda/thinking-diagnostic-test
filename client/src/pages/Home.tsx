@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getLoginUrl } from "@/const";
 import { useLocation } from "wouter";
-import { Brain, Layers, Zap, Shuffle, ArrowRight, LogIn, History, Sparkles } from "lucide-react";
+import { Brain, Layers, Zap, Shuffle, ArrowRight, LogIn, History, Sparkles, BookOpen } from "lucide-react";
 
 export default function Home() {
   const { user, loading, isAuthenticated } = useAuth();
@@ -54,6 +54,10 @@ export default function Home() {
             <span className="font-bold text-sm">Thinking Blueprint</span>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => navigate("/types")} className="gap-1.5 text-xs">
+              <BookOpen className="w-3.5 h-3.5" />
+              80タイプ一覧
+            </Button>
             {isAuthenticated && (
               <Button variant="ghost" size="sm" onClick={() => navigate("/history")} className="gap-1.5 text-xs">
                 <History className="w-3.5 h-3.5" />
@@ -98,6 +102,10 @@ export default function Home() {
             <Button size="lg" onClick={() => navigate("/diagnostic")} className="px-8 gap-2 text-base h-12">
               診断を開始する
               <ArrowRight className="w-5 h-5" />
+            </Button>
+            <Button variant="outline" size="lg" onClick={() => navigate("/types")} className="px-6 gap-2 h-12">
+              <BookOpen className="w-5 h-5" />
+              80タイプを見る
             </Button>
             {isAuthenticated && (
               <Button variant="outline" size="lg" onClick={() => navigate("/history")} className="px-6 gap-2 h-12">
@@ -177,10 +185,16 @@ export default function Home() {
           <p className="text-muted-foreground mb-8">
             80タイプの中から、あなた固有の思考パターンを特定します
           </p>
-          <Button size="lg" onClick={() => navigate("/diagnostic")} className="px-8 gap-2 text-base h-12">
-            無料で診断を始める
-            <ArrowRight className="w-5 h-5" />
-          </Button>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Button size="lg" onClick={() => navigate("/diagnostic")} className="px-8 gap-2 text-base h-12">
+              無料で診断を始める
+              <ArrowRight className="w-5 h-5" />
+            </Button>
+            <Button variant="outline" size="lg" onClick={() => navigate("/types")} className="px-6 gap-2 h-12">
+              <BookOpen className="w-5 h-5" />
+              全80タイプを探索する
+            </Button>
+          </div>
         </div>
       </section>
 

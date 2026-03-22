@@ -8,6 +8,8 @@ import Home from "./pages/Home";
 import Diagnostic from "./pages/Diagnostic";
 import DiagnosticResultPage from "./pages/DiagnosticResult";
 import DiagnosticHistory from "./pages/DiagnosticHistory";
+import TypeCatalog from "./pages/TypeCatalog";
+import TypeDetail from "./pages/TypeDetail";
 
 function Router() {
   return (
@@ -16,6 +18,8 @@ function Router() {
       <Route path={"/diagnostic"} component={Diagnostic} />
       <Route path={"/result/:id"} component={DiagnosticResultPage} />
       <Route path={"/history"} component={DiagnosticHistory} />
+      <Route path={"/types"} component={TypeCatalog} />
+      <Route path={"/types/:code"} component={TypeDetail} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
