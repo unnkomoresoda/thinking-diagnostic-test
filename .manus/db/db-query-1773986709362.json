@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `diagnostic_results` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`userId` int NOT NULL,\n\t`baseType` varchar(8) NOT NULL,\n\t`cognitiveLayer` int NOT NULL,\n\t`processingPower` float NOT NULL,\n\t`dynamicShift` float NOT NULL,\n\t`typeName` varchar(128) NOT NULL,\n\t`typeCode` varchar(16) NOT NULL,\n\t`dimensionScores` json,\n\t`rawAnswers` json,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `diagnostic_results_id` PRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2TSmmgZkDFQ3WhH.root --database MUQ9ydjQa5XvBr8iLQhwPK --execute CREATE TABLE `diagnostic_results` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`userId` int NOT NULL,\n\t`baseType` varchar(8) NOT NULL,\n\t`cognitiveLayer` int NOT NULL,\n\t`processingPower` float NOT NULL,\n\t`dynamicShift` float NOT NULL,\n\t`typeName` varchar(128) NOT NULL,\n\t`typeCode` varchar(16) NOT NULL,\n\t`dimensionScores` json,\n\t`rawAnswers` json,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `diagnostic_results_id` PRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 3541
+}

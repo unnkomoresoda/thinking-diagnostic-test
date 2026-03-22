@@ -1,0 +1,13 @@
+{
+  "query": "SHOW TABLES LIKE 'diagnostic_results';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2TSmmgZkDFQ3WhH.root --database MUQ9ydjQa5XvBr8iLQhwPK --execute SHOW TABLES LIKE 'diagnostic_results';",
+  "rows": [
+    {
+      "Tables_in_MUQ9ydjQa5XvBr8iLQhwPK (diagnostic_results)": "diagnostic_results"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_MUQ9ydjQa5XvBr8iLQhwPK (diagnostic_results)\ndiagnostic_results\n",
+  "stderr": "",
+  "execution_time_ms": 2048
+}
