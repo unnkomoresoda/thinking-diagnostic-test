@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `question_patterns` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`patternType` enum('layer','power','shift') NOT NULL,\n\t`patternIndex` int NOT NULL,\n\t`questions` json NOT NULL,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `question_patterns_id` PRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2TSmmgZkDFQ3WhH.root --database MUQ9ydjQa5XvBr8iLQhwPK --execute CREATE TABLE `question_patterns` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`patternType` enum('layer','power','shift') NOT NULL,\n\t`patternIndex` int NOT NULL,\n\t`questions` json NOT NULL,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `question_patterns_id` PRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1814
+}

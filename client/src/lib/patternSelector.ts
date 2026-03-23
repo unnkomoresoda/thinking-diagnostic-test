@@ -11,6 +11,7 @@ export interface QuestionPattern {
   powerQuestions: PowerQuestion[];
   shiftScenarios: ShiftScenario[];
   patternId: string;
+  patternIndex: number;
 }
 
 /**
@@ -22,18 +23,37 @@ export function generatePatternId(): string {
 
 /**
  * Get the current pattern for this diagnostic session
- * For now, returns the default questions
- * In the future, this will select from multiple LLM-generated patterns
+ * Selects a random pattern index (0-3) for use with pre-generated patterns
+ * Falls back to default questions if patterns are not yet generated
  */
 export function getCurrentPattern(): QuestionPattern {
   const patternId = generatePatternId();
+  // Select random pattern index (0-3) for 4 pre-generated patterns
+  const patternIndex = Math.floor(Math.random() * 4);
+  
+  // Store pattern index in session storage for later retrieval
+  if (typeof window !== 'undefined') {
+    sessionStorage.setItem('diagnosticPatternIndex', patternIndex.toString());
+  }
   
   return {
     layerQuestions: LAYER_QUESTIONS,
     powerQuestions: POWER_QUESTIONS,
     shiftScenarios: SHIFT_SCENARIOS,
     patternId,
+    patternIndex,
   };
+}
+
+/**
+ * Get the pattern index for this session
+ */
+export function getPatternIndex(): number {
+  if (typeof window !== 'undefined') {
+    const stored = sessionStorage.getItem('diagnosticPatternIndex');
+    if (stored) return parseInt(stored, 10);
+  }
+  return Math.floor(Math.random() * 4);
 }
 
 /**

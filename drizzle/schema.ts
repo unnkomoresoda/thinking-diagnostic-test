@@ -39,3 +39,23 @@ export const diagnosticResults = mysqlTable("diagnostic_results", {
 
 export type DiagnosticResult = typeof diagnosticResults.$inferSelect;
 export type InsertDiagnosticResult = typeof diagnosticResults.$inferInsert;
+
+// ============================================================
+// Question Patterns (Pre-generated patterns for variety)
+// ============================================================
+export const questionPatterns = mysqlTable("question_patterns", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Pattern type: "layer", "power", or "shift" */
+  patternType: mysqlEnum("patternType", ["layer", "power", "shift"]).notNull(),
+  /** Pattern index 0-3 (4 patterns per type) */
+  patternIndex: int("patternIndex").notNull(),
+  /** Questions array JSON */
+  questions: json("questions").notNull(),
+  /** Creation timestamp */
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  /** Update timestamp */
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type QuestionPattern = typeof questionPatterns.$inferSelect;
+export type InsertQuestionPattern = typeof questionPatterns.$inferInsert;

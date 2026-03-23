@@ -64,6 +64,21 @@ export default function AdminDashboard() {
     enabled: isAdmin,
   });
 
+  const generatePatternsMutation = trpc.admin.generatePatterns.useMutation();
+  const { data: savedPatterns } = trpc.admin.getPatterns.useQuery(
+    { patternType: "layer" },
+    { enabled: isAdmin }
+  );
+
+  const handleGeneratePatterns = async () => {
+    try {
+      await generatePatternsMutation.mutateAsync();
+      alert("パターンを生成・保存しました！");
+    } catch (error) {
+      alert("パターン生成に失敗しました: " + (error instanceof Error ? error.message : "Unknown error"));
+    }
+  };
+
   // Filter results by search
   const filteredResults = useMemo(() => {
     if (!results) return [];
@@ -156,6 +171,31 @@ export default function AdminDashboard() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
+        {/* Pattern Generation Section */}
+        <Card className="mb-8 border-amber-200 bg-amber-50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-amber-900">
+              <Layers className="w-5 h-5" />
+              質問パターン管理
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-amber-800 mb-4">
+              診断時に異なる質問セットを使用するために、パターンを生成・保存します。
+              {savedPatterns && savedPatterns.length > 0 && (
+                <span className="ml-2 font-semibold">✓ {savedPatterns.length}個のパターンが保存済み</span>
+              )}
+            </p>
+            <Button 
+              onClick={handleGeneratePatterns}
+              disabled={generatePatternsMutation.isPending}
+              className="gap-2"
+            >
+              {generatePatternsMutation.isPending ? "生成中..." : "パターンを生成・保存"}
+            </Button>
+          </CardContent>
+        </Card>
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <Card>

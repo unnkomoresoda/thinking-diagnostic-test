@@ -3,7 +3,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
-import { saveDiagnosticResult, getDiagnosticResultsByUser, getDiagnosticResultById, getAllDiagnosticResults, getDiagnosticStats, getMonthlyStats, getTypeDistribution } from "./db";
+import { saveDiagnosticResult, getDiagnosticResultsByUser, getDiagnosticResultById, getAllDiagnosticResults, getDiagnosticStats, getMonthlyStats, getTypeDistribution, saveQuestionPattern, getAllQuestionPatterns } from "./db";
 import { generateLayerPatterns, generatePowerPatterns, generateShiftPatterns } from "./questionPatternGenerator";
 import { TRPCError } from "@trpc/server";
 import {
@@ -190,6 +190,53 @@ export const appRouter = router({
     typeDistribution: adminProcedure.query(async () => {
       return getTypeDistribution();
     }),
+
+    /** Generate and save question patterns (admin only) */
+    generatePatterns: adminProcedure.mutation(async () => {
+      const patterns = {
+        layer: await generateLayerPatterns(),
+        power: await generatePowerPatterns(),
+        shift: await generateShiftPatterns(),
+      };
+
+      // Save layer patterns (4 patterns)
+      for (let i = 0; i < patterns.layer.length; i++) {
+        await saveQuestionPattern({
+          patternType: "layer",
+          patternIndex: i,
+          questions: patterns.layer[i],
+        });
+      }
+
+      // Save power patterns (4 patterns)
+      for (let i = 0; i < patterns.power.length; i++) {
+        await saveQuestionPattern({
+          patternType: "power",
+          patternIndex: i,
+          questions: patterns.power[i],
+        });
+      }
+
+      // Save shift patterns (4 patterns)
+      for (let i = 0; i < patterns.shift.length; i++) {
+        await saveQuestionPattern({
+          patternType: "shift",
+          patternIndex: i,
+          questions: patterns.shift[i],
+        });
+      }
+
+      return { success: true, message: "Patterns generated and saved successfully" };
+    }),
+
+    /** Get all question patterns for a type (admin only) */
+    getPatterns: adminProcedure
+      .input(z.object({
+        patternType: z.enum(["layer", "power", "shift"]),
+      }))
+      .query(async ({ input }) => {
+        return getAllQuestionPatterns(input.patternType);
+      }),
   }),
 });
 

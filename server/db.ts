@@ -1,6 +1,6 @@
 import { eq, desc, sql, count } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, diagnosticResults, InsertDiagnosticResult } from "../drizzle/schema";
+import { InsertUser, users, diagnosticResults, InsertDiagnosticResult, questionPatterns, InsertQuestionPattern } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -262,4 +262,55 @@ export async function getTypeDistribution() {
     .orderBy(desc(count()));
 
   return typeDistribution;
+}
+
+// ---- Question Patterns (Pre-generated) ----
+
+export async function saveQuestionPattern(data: InsertQuestionPattern) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Delete existing pattern if it exists
+  await db
+    .delete(questionPatterns)
+    .where(
+      sql`${questionPatterns.patternType} = ${data.patternType} AND ${questionPatterns.patternIndex} = ${data.patternIndex}`
+    );
+
+  // Insert new pattern
+  const result = await db.insert(questionPatterns).values(data);
+  return result[0].insertId;
+}
+
+export async function getQuestionPattern(patternType: "layer" | "power" | "shift", patternIndex: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const rows = await db
+    .select()
+    .from(questionPatterns)
+    .where(
+      sql`${questionPatterns.patternType} = ${patternType} AND ${questionPatterns.patternIndex} = ${patternIndex}`
+    )
+    .limit(1);
+
+  return rows[0] ?? null;
+}
+
+export async function getAllQuestionPatterns(patternType: "layer" | "power" | "shift") {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return db
+    .select()
+    .from(questionPatterns)
+    .where(eq(questionPatterns.patternType, patternType))
+    .orderBy(questionPatterns.patternIndex);
+}
+
+export async function deleteAllQuestionPatterns() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.delete(questionPatterns);
 }
