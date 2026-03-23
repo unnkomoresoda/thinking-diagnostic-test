@@ -48,6 +48,6 @@
 - [x] Gemini APIでProcessing Power複数パターン生成（パターン × 10問）
 - [x] Gemini APIでDynamic Shift複数パターン生成（パターン × 3シナリオ）
 - [x] diagnosticData.tsを拡張してパターン管理構造を実装
-- [ ] Diagnostic.tsxでランダムパターン選択ロジックを実装
-- [ ] スコアリングエンジンをパターン対応に更新
-- [ ] Vitestテスト追加（パターン選択ロジック）
+- [x] Diagnostic.tsxでランダムパターン選択ロジックを実装
+- [x] スコアリングエンジンをパターン対応に更新
+- [x] Vitestテスト追加（パターン選択ロジック）

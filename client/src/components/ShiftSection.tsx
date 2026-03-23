@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, Send, Info } from "lucide-react";
 import { SHIFT_SCENARIOS } from "@shared/diagnosticData";
+import { getCurrentPattern } from "@/lib/patternSelector";
 import { cn } from "@/lib/utils";
 
 interface ShiftSectionProps {
@@ -16,7 +17,8 @@ interface ShiftSectionProps {
 export function ShiftSection({ answers, onAnswer, onSubmit, onPrev }: ShiftSectionProps) {
   const [currentScenario, setCurrentScenario] = useState(0);
   const [currentPhase, setCurrentPhase] = useState(0);
-  const scenarios = SHIFT_SCENARIOS;
+  const pattern = getCurrentPattern();
+  const scenarios = pattern.shiftScenarios;
   const scenario = scenarios[currentScenario];
   const phase = scenario.phases[currentPhase];
 

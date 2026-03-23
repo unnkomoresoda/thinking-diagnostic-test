@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight, AlertTriangle } from "lucide-react";
 import { POWER_QUESTIONS } from "@shared/diagnosticData";
+import { getCurrentPattern } from "@/lib/patternSelector";
 import { cn } from "@/lib/utils";
 
 interface PowerSectionProps {
@@ -15,7 +16,8 @@ interface PowerSectionProps {
 
 export function PowerSection({ answers, onAnswer, onNext, onPrev }: PowerSectionProps) {
   const [currentQ, setCurrentQ] = useState(0);
-  const questions = POWER_QUESTIONS;
+  const pattern = getCurrentPattern();
+  const questions = pattern.powerQuestions;
   const question = questions[currentQ];
   const totalAnswered = Object.keys(answers).length;
   const allAnswered = totalAnswered >= questions.length;

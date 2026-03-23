@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { LAYER_QUESTIONS } from "@shared/diagnosticData";
+import { getCurrentPattern } from "@/lib/patternSelector";
 import { cn } from "@/lib/utils";
 
 interface LayerSectionProps {
@@ -15,7 +16,8 @@ interface LayerSectionProps {
 
 export function LayerSection({ answers, onAnswer, onNext, onPrev }: LayerSectionProps) {
   const [currentQ, setCurrentQ] = useState(0);
-  const questions = LAYER_QUESTIONS;
+  const pattern = getCurrentPattern();
+  const questions = pattern.layerQuestions;
   const question = questions[currentQ];
   const totalAnswered = Object.keys(answers).length;
   const allAnswered = totalAnswered >= questions.length;
