@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getLoginUrl } from "@/const";
 import { useLocation } from "wouter";
-import { Brain, Layers, Zap, Shuffle, ArrowRight, LogIn, History, Sparkles, BookOpen } from "lucide-react";
+import { Brain, Layers, Zap, Shuffle, ArrowRight, LogIn, History, Sparkles, BookOpen, Shield } from "lucide-react";
 
 export default function Home() {
   const { user, loading, isAuthenticated } = useAuth();
@@ -62,6 +62,12 @@ export default function Home() {
               <Button variant="ghost" size="sm" onClick={() => navigate("/history")} className="gap-1.5 text-xs">
                 <History className="w-3.5 h-3.5" />
                 診断履歴
+              </Button>
+            )}
+            {isAuthenticated && user?.role === "admin" && (
+              <Button variant="ghost" size="sm" onClick={() => navigate("/admin")} className="gap-1.5 text-xs">
+                <Shield className="w-3.5 h-3.5" />
+                管理
               </Button>
             )}
             {!loading && !isAuthenticated && (

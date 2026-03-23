@@ -1,4 +1,4 @@
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql, count } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, diagnosticResults, InsertDiagnosticResult } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -121,4 +121,89 @@ export async function getDiagnosticResultById(id: number) {
     .limit(1);
 
   return rows[0] ?? null;
+}
+
+// ---- Admin: All diagnostic results with user info ----
+
+export async function getAllDiagnosticResults(limit = 100, offset = 0) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return db
+    .select({
+      id: diagnosticResults.id,
+      userId: diagnosticResults.userId,
+      userName: users.name,
+      userEmail: users.email,
+      baseType: diagnosticResults.baseType,
+      cognitiveLayer: diagnosticResults.cognitiveLayer,
+      processingPower: diagnosticResults.processingPower,
+      dynamicShift: diagnosticResults.dynamicShift,
+      typeName: diagnosticResults.typeName,
+      typeCode: diagnosticResults.typeCode,
+      dimensionScores: diagnosticResults.dimensionScores,
+      createdAt: diagnosticResults.createdAt,
+    })
+    .from(diagnosticResults)
+    .innerJoin(users, eq(diagnosticResults.userId, users.id))
+    .orderBy(desc(diagnosticResults.createdAt))
+    .limit(limit)
+    .offset(offset);
+}
+
+export async function getDiagnosticStats() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Total count
+  const totalRows = await db
+    .select({ count: count() })
+    .from(diagnosticResults);
+  const totalCount = totalRows[0]?.count ?? 0;
+
+  // Unique users
+  const uniqueUserRows = await db
+    .select({ count: sql<number>`COUNT(DISTINCT ${diagnosticResults.userId})` })
+    .from(diagnosticResults);
+  const uniqueUsers = uniqueUserRows[0]?.count ?? 0;
+
+  // Base type distribution
+  const baseTypeDist = await db
+    .select({
+      baseType: diagnosticResults.baseType,
+      count: count(),
+    })
+    .from(diagnosticResults)
+    .groupBy(diagnosticResults.baseType)
+    .orderBy(desc(count()));
+
+  // Type code distribution (top 20)
+  const typeCodeDist = await db
+    .select({
+      typeCode: diagnosticResults.typeCode,
+      typeName: diagnosticResults.typeName,
+      count: count(),
+    })
+    .from(diagnosticResults)
+    .groupBy(diagnosticResults.typeCode, diagnosticResults.typeName)
+    .orderBy(desc(count()))
+    .limit(20);
+
+  // Layer distribution
+  const layerDist = await db
+    .select({
+      layer: diagnosticResults.cognitiveLayer,
+      count: count(),
+    })
+    .from(diagnosticResults)
+    .groupBy(diagnosticResults.cognitiveLayer)
+    .orderBy(diagnosticResults.cognitiveLayer);
+
+  return {
+    totalCount,
+    uniqueUsers,
+    baseTypeDist,
+    typeCodeDist,
+    layerDist,
+  };
 }

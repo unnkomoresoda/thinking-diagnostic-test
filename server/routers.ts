@@ -3,7 +3,8 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
-import { saveDiagnosticResult, getDiagnosticResultsByUser, getDiagnosticResultById } from "./db";
+import { saveDiagnosticResult, getDiagnosticResultsByUser, getDiagnosticResultById, getAllDiagnosticResults, getDiagnosticStats } from "./db";
+import { TRPCError } from "@trpc/server";
 import {
   calculateBaseType,
   calculateLayer,
@@ -19,6 +20,14 @@ import {
   LAYER_LABELS,
   TYPE_NAME_MATRIX,
 } from "@shared/diagnosticData";
+
+// Admin-only procedure: requires admin role
+const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
+  if (ctx.user.role !== 'admin') {
+    throw new TRPCError({ code: 'FORBIDDEN', message: 'Admin access required' });
+  }
+  return next({ ctx });
+});
 
 export const appRouter = router({
   system: systemRouter,
@@ -130,6 +139,25 @@ export const appRouter = router({
       totalTypes: 80,
       typeMatrix: TYPE_NAME_MATRIX,
     })),
+  }),
+
+  admin: router({
+    /** Get all diagnostic results with user info (admin only) */
+    allResults: adminProcedure
+      .input(z.object({
+        limit: z.number().min(1).max(500).default(100),
+        offset: z.number().min(0).default(0),
+      }).optional())
+      .query(async ({ input }) => {
+        const limit = input?.limit ?? 100;
+        const offset = input?.offset ?? 0;
+        return getAllDiagnosticResults(limit, offset);
+      }),
+
+    /** Get diagnostic statistics (admin only) */
+    stats: adminProcedure.query(async () => {
+      return getDiagnosticStats();
+    }),
   }),
 });
 

@@ -10,6 +10,7 @@ import DiagnosticResultPage from "./pages/DiagnosticResult";
 import DiagnosticHistory from "./pages/DiagnosticHistory";
 import TypeCatalog from "./pages/TypeCatalog";
 import TypeDetail from "./pages/TypeDetail";
+import AdminDashboard from "./pages/AdminDashboard";
 
 function Router() {
   return (
@@ -20,6 +21,7 @@ function Router() {
       <Route path={"/history"} component={DiagnosticHistory} />
       <Route path={"/types"} component={TypeCatalog} />
       <Route path={"/types/:code"} component={TypeDetail} />
+      <Route path={"/admin"} component={AdminDashboard} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
