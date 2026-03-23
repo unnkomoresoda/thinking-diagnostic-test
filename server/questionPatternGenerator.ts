@@ -65,10 +65,20 @@ Format as JSON with structure:
   }
 
   try {
-    return JSON.parse(content);
+    // Clean up the content to handle control characters
+    const cleanedContent = content
+      .replace(/[\x00-\x1F\x7F]/g, (match) => {
+        // Replace control characters with their escaped versions
+        const charCode = match.charCodeAt(0);
+        if (charCode === 0x0A) return '\n'; // newline
+        if (charCode === 0x0D) return '\r'; // carriage return
+        if (charCode === 0x09) return '\t'; // tab
+        return ''; // remove other control characters
+      });
+    return JSON.parse(cleanedContent);
   } catch (e) {
-    console.error("Failed to parse layer patterns:", content);
-    throw e;
+    console.error("Failed to parse layer patterns:", content.substring(0, 500));
+    throw new Error(`JSON parsing failed for layer patterns: ${e instanceof Error ? e.message : 'Unknown error'}`);
   }
 }
 
@@ -133,10 +143,20 @@ Format as JSON with structure:
   }
 
   try {
-    return JSON.parse(content);
+    // Clean up the content to handle control characters
+    const cleanedContent = content
+      .replace(/[\x00-\x1F\x7F]/g, (match) => {
+        // Replace control characters with their escaped versions
+        const charCode = match.charCodeAt(0);
+        if (charCode === 0x0A) return '\n'; // newline
+        if (charCode === 0x0D) return '\r'; // carriage return
+        if (charCode === 0x09) return '\t'; // tab
+        return ''; // remove other control characters
+      });
+    return JSON.parse(cleanedContent);
   } catch (e) {
-    console.error("Failed to parse power patterns:", content);
-    throw e;
+    console.error("Failed to parse power patterns:", content.substring(0, 500));
+    throw new Error(`JSON parsing failed for power patterns: ${e instanceof Error ? e.message : 'Unknown error'}`);
   }
 }
 
@@ -201,9 +221,19 @@ Format as JSON with structure:
   }
 
   try {
-    return JSON.parse(content);
+    // Clean up the content to handle control characters
+    const cleanedContent = content
+      .replace(/[\x00-\x1F\x7F]/g, (match) => {
+        // Replace control characters with their escaped versions
+        const charCode = match.charCodeAt(0);
+        if (charCode === 0x0A) return '\n'; // newline
+        if (charCode === 0x0D) return '\r'; // carriage return
+        if (charCode === 0x09) return '\t'; // tab
+        return ''; // remove other control characters
+      });
+    return JSON.parse(cleanedContent);
   } catch (e) {
-    console.error("Failed to parse shift patterns:", content);
-    throw e;
+    console.error("Failed to parse shift patterns:", content.substring(0, 500));
+    throw new Error(`JSON parsing failed for shift patterns: ${e instanceof Error ? e.message : 'Unknown error'}`);
   }
 }
