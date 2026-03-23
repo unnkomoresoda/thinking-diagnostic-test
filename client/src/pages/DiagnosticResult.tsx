@@ -7,7 +7,7 @@ import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
 } from "recharts";
-import { LAYER_LABELS, LAYER_DESCRIPTIONS } from "@shared/diagnosticData";
+import { LAYER_LABELS, LAYER_DESCRIPTIONS, getTopLayers } from "@shared/diagnosticData";
 import type { LayerLabel } from "@shared/diagnosticData";
 
 // For inline result display (no route, passed as props)
@@ -65,6 +65,12 @@ export function InlineResult({ result, onRestart }: InlineResultProps) {
     result.dynamicShift >= 60 ? "B" :
     result.dynamicShift >= 40 ? "C" : "D";
 
+  // Hybrid layer detection
+  const topLayers = getTopLayers(result.dimensionScores.layerDistribution);
+  const isHybrid = topLayers.isHybrid;
+  const secondaryLabel = topLayers.secondary ? LAYER_LABELS[topLayers.secondary - 1] : null;
+  const secondaryDesc = topLayers.secondary ? LAYER_DESCRIPTIONS[LAYER_LABELS[topLayers.secondary - 1] as LayerLabel] : null;
+
   return (
     <div className="max-w-4xl mx-auto">
       {/* Header */}
@@ -112,15 +118,39 @@ export function InlineResult({ result, onRestart }: InlineResultProps) {
         />
       </div>
 
-      {/* Layer Description */}
+      {/* Layer Description & Hybrid Detection */}
       <Card className="mb-8 border-0 shadow-sm">
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Cognitive Layer: {result.layerLabel}</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg">Cognitive Layer: {result.layerLabel}</CardTitle>
+            {isHybrid && (
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800">
+                ハイブリッド型
+              </span>
+            )}
+          </div>
         </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            {result.layerDescription}
-          </p>
+        <CardContent className="space-y-4">
+          <div>
+            <p className="text-sm font-medium mb-2">メインレイヤー: L{topLayers.primary} {LAYER_LABELS[topLayers.primary - 1]}</p>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {LAYER_DESCRIPTIONS[LAYER_LABELS[topLayers.primary - 1] as LayerLabel]}
+            </p>
+          </div>
+          {isHybrid && secondaryLabel && secondaryDesc && (
+            <div className="pt-4 border-t">
+              <p className="text-sm font-medium mb-2 text-amber-700">サブレイヤー: L{topLayers.secondary} {secondaryLabel}</p>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {secondaryDesc}
+              </p>
+              <div className="mt-3 p-3 bg-amber-50 rounded-lg border border-amber-200">
+                <p className="text-xs font-semibold text-amber-900 mb-1">💡 ハイブリッド型の強み</p>
+                <p className="text-xs text-amber-800 leading-relaxed">
+                  あなたは{LAYER_LABELS[topLayers.primary - 1]}と{secondaryLabel}の両方の思考スタイルを持つハイブリッド型です。状況に応じて最適なレイヤーに切り替えられるため、複雑な問題解決に優れています。短期の実行と中長期の戦略の両立が可能な希少なタイプです。
+                </p>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 

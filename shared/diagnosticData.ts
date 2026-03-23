@@ -453,6 +453,22 @@ export function calculateLayer(answers: Record<string, number>): { layer: number
   return { layer: maxIdx + 1, distribution: dist };
 }
 
+/** Get top 2 layers (for hybrid layer detection) */
+export function getTopLayers(distribution: number[]): { primary: number; secondary?: number; isHybrid: boolean } {
+  // Find indices sorted by count (descending)
+  const sorted = distribution
+    .map((count, idx) => ({ layer: idx + 1, count }))
+    .sort((a, b) => b.count - a.count);
+  
+  const primary = sorted[0]?.layer ?? 1;
+  const secondary = sorted[1]?.layer;
+  
+  // If top 2 are equal or very close (within 1), it's a hybrid type
+  const isHybrid = secondary !== undefined && sorted[0].count <= sorted[1].count + 1;
+  
+  return { primary, secondary: isHybrid ? secondary : undefined, isHybrid };
+}
+
 /** Calculate Processing Power score */
 export function calculatePower(answers: Record<string, number>): { score: number; details: { correct: number; total: number } } {
   let correct = 0;
