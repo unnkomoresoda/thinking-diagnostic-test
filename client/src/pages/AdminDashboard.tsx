@@ -44,6 +44,7 @@ export default function AdminDashboard() {
   const [page, setPage] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [statsTab, setStatsTab] = useState<"overall" | "monthly">("overall");
+  const [mainTab, setMainTab] = useState<"stats" | "patterns">("stats");
 
   const isAdmin = user?.role === "admin";
 
@@ -65,10 +66,19 @@ export default function AdminDashboard() {
   });
 
   const generatePatternsMutation = trpc.admin.generatePatterns.useMutation();
-  const { data: savedPatterns } = trpc.admin.getPatterns.useQuery(
+  const { data: layerPatterns, refetch: refetchLayerPatterns } = trpc.admin.getPatterns.useQuery(
     { patternType: "layer" },
     { enabled: isAdmin }
   );
+  const { data: powerPatterns, refetch: refetchPowerPatterns } = trpc.admin.getPatterns.useQuery(
+    { patternType: "power" },
+    { enabled: isAdmin }
+  );
+  const { data: shiftPatterns, refetch: refetchShiftPatterns } = trpc.admin.getPatterns.useQuery(
+    { patternType: "shift" },
+    { enabled: isAdmin }
+  );
+  const savedPatterns = (layerPatterns?.length ?? 0) + (powerPatterns?.length ?? 0) + (shiftPatterns?.length ?? 0);
 
   const handleGeneratePatterns = async () => {
     try {
@@ -182,17 +192,27 @@ export default function AdminDashboard() {
           <CardContent>
             <p className="text-sm text-amber-800 mb-4">
               診断時に異なる質問セットを使用するために、パターンを生成・保存します。
-              {savedPatterns && savedPatterns.length > 0 && (
-                <span className="ml-2 font-semibold">✓ {savedPatterns.length}個のパターンが保存済み</span>
+              {savedPatterns > 0 && (
+                <span className="ml-2 font-semibold">✓ {savedPatterns}個のパターンが保存済み</span>
               )}
             </p>
-            <Button 
-              onClick={handleGeneratePatterns}
-              disabled={generatePatternsMutation.isPending}
-              className="gap-2"
-            >
-              {generatePatternsMutation.isPending ? "生成中..." : "パターンを生成・保存"}
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                onClick={handleGeneratePatterns}
+                disabled={generatePatternsMutation.isPending}
+                className="gap-2"
+              >
+                {generatePatternsMutation.isPending ? "生成中..." : "パターンを生成・保存"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setMainTab("patterns")}
+                className="gap-2"
+              >
+                <ClipboardList className="w-4 h-4" />
+                パターン管理
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
@@ -378,8 +398,11 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        {/* Results Table */}
-        <Card>
+        {/* Conditional Rendering based on mainTab */}
+        {mainTab === "stats" && (
+          <>
+            {/* Results Table */}
+            <Card>
           <CardHeader className="pb-3">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <CardTitle className="text-base flex items-center gap-2">
@@ -496,6 +519,96 @@ export default function AdminDashboard() {
             )}
           </CardContent>
         </Card>
+          </>
+        )}
+
+        {/* Pattern Management Tab */}
+        {mainTab === "patterns" && (
+          <>
+            <div className="mb-6 flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setMainTab("stats")}
+                className="gap-1.5"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                統計に戻る
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Layer Patterns */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Cognitive Layer パターン</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {layerPatterns && layerPatterns.length > 0 ? (
+                    <div className="space-y-2">
+                      {layerPatterns.map((pattern, idx) => (
+                        <div key={idx} className="p-3 bg-muted rounded-lg text-sm">
+                          <div className="font-medium mb-1">パターン {pattern.patternIndex}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {Array.isArray(pattern.questions) ? `${pattern.questions.length}問` : "データ形式エラー"}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">パターンがまだ生成されていません</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Power Patterns */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Processing Power パターン</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {powerPatterns && powerPatterns.length > 0 ? (
+                    <div className="space-y-2">
+                      {powerPatterns.map((pattern, idx) => (
+                        <div key={idx} className="p-3 bg-muted rounded-lg text-sm">
+                          <div className="font-medium mb-1">パターン {pattern.patternIndex}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {Array.isArray(pattern.questions) ? `${pattern.questions.length}問` : "データ形式エラー"}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">パターンがまだ生成されていません</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Shift Patterns */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Dynamic Shift パターン</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {shiftPatterns && shiftPatterns.length > 0 ? (
+                    <div className="space-y-2">
+                      {shiftPatterns.map((pattern, idx) => (
+                        <div key={idx} className="p-3 bg-muted rounded-lg text-sm">
+                          <div className="font-medium mb-1">パターン {pattern.patternIndex}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {Array.isArray(pattern.questions) ? `${pattern.questions.length}シナリオ` : "データ形式エラー"}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">パターンがまだ生成されていません</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </>
+        )}
       </main>
     </div>
   );
