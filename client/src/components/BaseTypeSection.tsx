@@ -75,19 +75,26 @@ export function BaseTypeSection({ answers, onAnswer, onNext, onPrev }: BaseTypeS
       </Card>
 
       <div className="flex flex-wrap justify-center gap-1.5 mb-6">
-        {questions.map((q, i) => (
-          <button
-            key={q.id}
-            onClick={() => setCurrentQ(i)}
-            className={cn(
-              "w-7 h-7 rounded-full text-xs font-medium transition-all",
-              i === currentQ && "ring-2 ring-primary ring-offset-2",
-              answers[q.id] ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-            )}
-          >
-            {i + 1}
-          </button>
-        ))}
+        {questions.map((q, i) => {
+          const questionNumber = i + 1;
+          const isAnswered = answers[q.id] !== undefined;
+          const isCurrent = i === currentQ;
+          return (
+            <button
+              key={q.id}
+              onClick={() => setCurrentQ(i)}
+              className={cn(
+                "w-7 h-7 rounded-full text-xs font-medium transition-all",
+                isCurrent && "ring-2 ring-primary ring-offset-2",
+                isAnswered ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+              )}
+              aria-label={`Question ${questionNumber}`}
+              aria-pressed={isAnswered}
+            >
+              {questionNumber}
+            </button>
+          );
+        })}
       </div>
 
       <div className="flex justify-between">
