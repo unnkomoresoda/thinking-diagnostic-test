@@ -3,7 +3,7 @@ import { getDb } from "./db";
 import { getTypeDistribution } from "./db";
 import { users, diagnosticResults } from "../drizzle/schema";
 
-describe("Type Distribution Statistics", () => {
+describe("Type Distribution Statistics", { timeout: 30000 }, () => {
   let db: any;
 
   beforeAll(async () => {

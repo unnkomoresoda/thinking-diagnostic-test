@@ -4,6 +4,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 import { saveDiagnosticResult, getDiagnosticResultsByUser, getDiagnosticResultById, getAllDiagnosticResults, getDiagnosticStats, getMonthlyStats, getTypeDistribution } from "./db";
+import { generateLayerPatterns, generatePowerPatterns, generateShiftPatterns } from "./questionPatternGenerator";
 import { TRPCError } from "@trpc/server";
 import {
   calculateBaseType,
@@ -139,6 +140,27 @@ export const appRouter = router({
       totalTypes: 80,
       typeMatrix: TYPE_NAME_MATRIX,
     })),
+
+    /** Generate alternative question patterns (admin only) */
+    generateLayerPatterns: adminProcedure
+      .input(z.object({ patternCount: z.number().min(1).max(10).default(4) }))
+      .mutation(async ({ input }) => {
+        return generateLayerPatterns(input.patternCount);
+      }),
+
+    /** Generate alternative processing power patterns (admin only) */
+    generatePowerPatterns: adminProcedure
+      .input(z.object({ patternCount: z.number().min(1).max(10).default(4) }))
+      .mutation(async ({ input }) => {
+        return generatePowerPatterns(input.patternCount);
+      }),
+
+    /** Generate alternative dynamic shift patterns (admin only) */
+    generateShiftPatterns: adminProcedure
+      .input(z.object({ patternCount: z.number().min(1).max(10).default(4) }))
+      .mutation(async ({ input }) => {
+        return generateShiftPatterns(input.patternCount);
+      }),
   }),
 
   admin: router({

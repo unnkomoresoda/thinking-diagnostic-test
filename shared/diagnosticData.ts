@@ -593,3 +593,49 @@ export function getTypeName(baseType: BaseType, layer: number): string {
 export function getTypeCode(baseType: BaseType, layer: number): string {
   return `${baseType}-L${layer}`;
 }
+
+
+// ============================================================
+// Question Pattern Management (for multiple question sets)
+// ============================================================
+
+export interface QuestionPattern {
+  patternId: string;
+  questions: LayerQuestion[] | PowerQuestion[];
+}
+
+export interface ShiftPattern {
+  patternId: string;
+  scenarios: ShiftScenario[];
+}
+
+export interface PatternSet {
+  layerPatterns: QuestionPattern[];
+  powerPatterns: QuestionPattern[];
+  shiftPatterns: ShiftPattern[];
+}
+
+/**
+ * Select a random pattern from a list
+ */
+export function selectRandomPattern<T extends { patternId: string }>(
+  patterns: T[]
+): T {
+  if (patterns.length === 0) {
+    throw new Error("No patterns available");
+  }
+  return patterns[Math.floor(Math.random() * patterns.length)];
+}
+
+/**
+ * Select random questions/scenarios from a pattern
+ */
+export function getQuestionsFromPattern(
+  pattern: QuestionPattern
+): LayerQuestion[] | PowerQuestion[] {
+  return pattern.questions;
+}
+
+export function getScenariosFromPattern(pattern: ShiftPattern): ShiftScenario[] {
+  return pattern.scenarios;
+}

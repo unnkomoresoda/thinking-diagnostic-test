@@ -44,3 +44,10 @@
 - [x] バックエンド：タイプ別診断数取得API
 - [x] タイプランキング表示（多い順・少ない順）
 - [x] Vitestテスト追加（タイプ分布統計API）
+- [x] Gemini APIでCognitive Layer複数パターン生成（パターン × 10問）
+- [x] Gemini APIでProcessing Power複数パターン生成（パターン × 10問）
+- [x] Gemini APIでDynamic Shift複数パターン生成（パターン × 3シナリオ）
+- [x] diagnosticData.tsを拡張してパターン管理構造を実装
+- [ ] Diagnostic.tsxでランダムパターン選択ロジックを実装
+- [ ] スコアリングエンジンをパターン対応に更新
+- [ ] Vitestテスト追加（パターン選択ロジック）
