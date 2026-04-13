@@ -83,8 +83,15 @@ export default function AdminDashboard() {
   const handleGeneratePatterns = async () => {
     try {
       await generatePatternsMutation.mutateAsync();
+      // Refetch patterns to update the saved patterns count
+      await Promise.all([
+        refetchLayerPatterns(),
+        refetchPowerPatterns(),
+        refetchShiftPatterns(),
+      ]);
       alert("パターンを生成・保存しました！");
     } catch (error) {
+      console.error("Pattern generation error:", error);
       alert("パターン生成に失敗しました: " + (error instanceof Error ? error.message : "Unknown error"));
     }
   };

@@ -254,7 +254,7 @@ export const appRouter = router({
         await saveQuestionPattern({
           patternType: "shift",
           patternIndex: i,
-          questions: patterns.shift[i],
+          questions: patterns.shift[i].scenarios,
         });
       }
 

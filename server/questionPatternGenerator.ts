@@ -5,6 +5,42 @@ import type {
   ShiftScenario,
 } from "@shared/diagnosticData";
 
+// Helper function to add timeout to LLM calls
+async function invokeLLMWithTimeout(messages: any[], timeoutMs: number = 60000) {
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error(`LLM request timeout (${timeoutMs}ms)`)), timeoutMs)
+  );
+
+  return Promise.race([
+    invokeLLM({ messages }),
+    timeoutPromise,
+  ]);
+}
+
+// Helper function to parse LLM JSON response
+function parseLLMResponse(content: string): any {
+  let jsonStr = content;
+
+  // Remove markdown code blocks if present
+  const jsonMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (jsonMatch) {
+    jsonStr = jsonMatch[1];
+  }
+
+  // Clean up the content to handle control characters
+  const cleanedContent = jsonStr
+    .replace(/[\x00-\x1F\x7F]/g, (match) => {
+      const charCode = match.charCodeAt(0);
+      if (charCode === 0x0a) return "\n"; // newline
+      if (charCode === 0x0d) return "\r"; // carriage return
+      if (charCode === 0x09) return "\t"; // tab
+      return ""; // remove other control characters
+    })
+    .trim();
+
+  return JSON.parse(cleanedContent);
+}
+
 /**
  * Generate multiple patterns of Cognitive Layer questions using LLM
  */
@@ -44,53 +80,37 @@ Format as JSON with structure:
   ]
 }`;
 
-  const result = await invokeLLM({
-    messages: [
-      {
-        role: "system",
-        content:
-          "You are a JSON generator. Always respond with valid JSON only, no markdown formatting. Do not include markdown code blocks or any text outside the JSON.",
-      },
-      {
-        role: "user",
-        content: prompt,
-      },
-    ],
-  });
-
-  const content = result.choices[0]?.message?.content;
-  if (typeof content !== "string") {
-    throw new Error("Invalid LLM response for layer patterns");
-  }
-
   try {
-    // Extract JSON from the content (handle markdown code blocks and extra text)
-    let jsonStr = content;
-    
-    // Remove markdown code blocks if present
-    const jsonMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (jsonMatch) {
-      jsonStr = jsonMatch[1];
+    const result = (await invokeLLMWithTimeout(
+      [
+        {
+          role: "system",
+          content:
+            "You are a JSON generator. Always respond with valid JSON only, no markdown formatting. Do not include markdown code blocks or any text outside the JSON.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      60000
+    )) as any;
+
+    const content = result.choices[0]?.message?.content;
+    if (typeof content !== "string") {
+      throw new Error("Invalid LLM response for layer patterns");
     }
-    
-    // Clean up the content to handle control characters
-    const cleanedContent = jsonStr
-      .replace(/[\x00-\x1F\x7F]/g, (match) => {
-        // Replace control characters with their escaped versions
-        const charCode = match.charCodeAt(0);
-        if (charCode === 0x0A) return '\n'; // newline
-        if (charCode === 0x0D) return '\r'; // carriage return
-        if (charCode === 0x09) return '\t'; // tab
-        return ''; // remove other control characters
-      })
-      .trim();
-    
-    const parsed = JSON.parse(cleanedContent);
-    // Return only the patterns array, extracting questions from each pattern
+
+    const parsed = parseLLMResponse(content);
     return parsed.patterns.map((p: any) => p.questions);
   } catch (e) {
-    console.error("Failed to parse layer patterns:", content.substring(0, 500));
-    throw new Error(`JSON parsing failed for layer patterns: ${e instanceof Error ? e.message : 'Unknown error'}`);
+    console.error(
+      "Failed to generate layer patterns:",
+      e instanceof Error ? e.message : "Unknown error"
+    );
+    throw new Error(
+      `Layer pattern generation failed: ${e instanceof Error ? e.message : "Unknown error"}`
+    );
   }
 }
 
@@ -134,53 +154,37 @@ Format as JSON with structure:
   ]
 }`;
 
-  const result = await invokeLLM({
-    messages: [
-      {
-        role: "system",
-        content:
-          "You are a JSON generator. Always respond with valid JSON only, no markdown formatting. Do not include markdown code blocks or any text outside the JSON.",
-      },
-      {
-        role: "user",
-        content: prompt,
-      },
-    ],
-  });
-
-  const content = result.choices[0]?.message?.content;
-  if (typeof content !== "string") {
-    throw new Error("Invalid LLM response for power patterns");
-  }
-
   try {
-    // Extract JSON from the content (handle markdown code blocks and extra text)
-    let jsonStr = content;
-    
-    // Remove markdown code blocks if present
-    const jsonMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (jsonMatch) {
-      jsonStr = jsonMatch[1];
+    const result = (await invokeLLMWithTimeout(
+      [
+        {
+          role: "system",
+          content:
+            "You are a JSON generator. Always respond with valid JSON only, no markdown formatting. Do not include markdown code blocks or any text outside the JSON.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      60000
+    )) as any;
+
+    const content = result.choices[0]?.message?.content;
+    if (typeof content !== "string") {
+      throw new Error("Invalid LLM response for power patterns");
     }
-    
-    // Clean up the content to handle control characters
-    const cleanedContent = jsonStr
-      .replace(/[\x00-\x1F\x7F]/g, (match) => {
-        // Replace control characters with their escaped versions
-        const charCode = match.charCodeAt(0);
-        if (charCode === 0x0A) return '\n'; // newline
-        if (charCode === 0x0D) return '\r'; // carriage return
-        if (charCode === 0x09) return '\t'; // tab
-        return ''; // remove other control characters
-      })
-      .trim();
-    
-    const parsed = JSON.parse(cleanedContent);
-    // Return only the patterns array, extracting questions from each pattern
+
+    const parsed = parseLLMResponse(content);
     return parsed.patterns.map((p: any) => p.questions);
   } catch (e) {
-    console.error("Failed to parse power patterns:", content.substring(0, 500));
-    throw new Error(`JSON parsing failed for power patterns: ${e instanceof Error ? e.message : 'Unknown error'}`);
+    console.error(
+      "Failed to generate power patterns:",
+      e instanceof Error ? e.message : "Unknown error"
+    );
+    throw new Error(
+      `Power pattern generation failed: ${e instanceof Error ? e.message : "Unknown error"}`
+    );
   }
 }
 
@@ -224,52 +228,39 @@ Format as JSON with structure:
   ]
 }`;
 
-  const result = await invokeLLM({
-    messages: [
-      {
-        role: "system",
-        content:
-          "You are a JSON generator. Always respond with valid JSON only, no markdown formatting. Do not include markdown code blocks or any text outside the JSON.",
-      },
-      {
-        role: "user",
-        content: prompt,
-      },
-    ],
-  });
-
-  const content = result.choices[0]?.message?.content;
-  if (typeof content !== "string") {
-    throw new Error("Invalid LLM response for shift patterns");
-  }
-
   try {
-    // Extract JSON from the content (handle markdown code blocks and extra text)
-    let jsonStr = content;
-    
-    // Remove markdown code blocks if present
-    const jsonMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (jsonMatch) {
-      jsonStr = jsonMatch[1];
+    const result = (await invokeLLMWithTimeout(
+      [
+        {
+          role: "system",
+          content:
+            "You are a JSON generator. Always respond with valid JSON only, no markdown formatting. Do not include markdown code blocks or any text outside the JSON.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      60000
+    )) as any;
+
+    const content = result.choices[0]?.message?.content;
+    if (typeof content !== "string") {
+      throw new Error("Invalid LLM response for shift patterns");
     }
-    
-    // Clean up the content to handle control characters
-    const cleanedContent = jsonStr
-      .replace(/[\x00-\x1F\x7F]/g, (match) => {
-        // Replace control characters with their escaped versions
-        const charCode = match.charCodeAt(0);
-        if (charCode === 0x0A) return '\n'; // newline
-        if (charCode === 0x0D) return '\r'; // carriage return
-        if (charCode === 0x09) return '\t'; // tab
-        return ''; // remove other control characters
-      })
-      .trim();
-    
-    const parsed = JSON.parse(cleanedContent);
-    // Return only the patterns array, extracting scenarios from each pattern
-    return parsed.patterns.map((p: any) => p.scenarios);
+
+    const parsed = parseLLMResponse(content);
+    return parsed.patterns.map((p: any) => ({
+      patternId: p.patternId,
+      scenarios: p.scenarios,
+    }));
   } catch (e) {
-    console.error("Failed to parse shift patterns:", content.substring(0, 500));
-    throw new Error(`JSON parsing failed for shift patterns: ${e instanceof Error ? e.message : 'Unknown error'}`);
+    console.error(
+      "Failed to generate shift patterns:",
+      e instanceof Error ? e.message : "Unknown error"
+    );
+    throw new Error(
+      `Shift pattern generation failed: ${e instanceof Error ? e.message : "Unknown error"}`
+    );
   }
 }
